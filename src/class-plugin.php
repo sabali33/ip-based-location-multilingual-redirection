@@ -1,11 +1,50 @@
 <?php
 declare(strict_types=1);
 
-if(class_exists('T2G_Plugin')){
-	return;
-}
-class T2G_Plugin
+namespace Sagani_IP_Location_Multilingual_Redirection\src;
+
+use Exception;
+
+final class Plugin
 {
+	/**
+	 * @throws Exception
+	 */
+	public static function setup(): void
+	{
+		if(!defined( 'GEO_API_URL')){
+			$api_url = getenv('GEO_API_URL');
+			if(!$api_url){
+				throw new Exception("You must define GEO_API_URL in your wp-config.php file");
+			}
+			define('GEO_API_URL' , $api_url);
+		}
+	}
+
+	/**
+	 * @param string $message
+	 * @return void
+	 */
+	public static function error_notice( string $message ): void {
+		foreach ( array( 'admin_notices', 'network_admin_notices' ) as $hook ) {
+			add_action(
+				$hook,
+				static function () use ( $message ) {
+					$class = 'notice notice-error';
+
+					printf(
+						'<div class="%1$s"><p>%2$s</p></div>',
+						esc_attr( $class ),
+						wp_kses_post( $message )
+					);
+				}
+			);
+		}
+	}
+
+	/**
+	 * @return string|null
+	 */
 	private static function user_Ip():?string
 	{
 		if(wp_get_environment_type() === 'local'){
@@ -32,12 +71,12 @@ class T2G_Plugin
 		return null;
 	}
 
+	/**
+	 * @param string $ip_address
+	 * @return array
+	 */
 	private static function user_languages(string $ip_address): array
 	{
-//		if(isset($_SERVER['HTTP_ACCEPT_LANGUAGE'])){
-//			return explode(',', $_SERVER['HTTP_ACCEPT_LANGUAGE']);
-//		}
-
 		$cache = get_transient($ip_address);
 
 		if($cache){
@@ -90,6 +129,11 @@ class T2G_Plugin
 				return 'en';
 		}
 	}
+
+	/**
+	 * @param string $locale
+	 * @return array|false|int|string|\WP_Error|\WP_Term|null
+	 */
 	private static function link(string $locale){
 
 
@@ -105,22 +149,44 @@ class T2G_Plugin
 		}
 	}
 
+	/**
+	 * @param string $url
+	 * @return void
+	 */
 	private static function redirect(string $url): void
 	{
 		wp_safe_redirect($url);
 		exit;
 	}
 
+	/**
+	 * @param string $url
+	 * @return string
+	 */
 	public static function filter_switch_url(string $url)
 	{
 		return add_query_arg(['from_switcher' => 1], $url);
 	}
+
+	/**
+	 * @param string $key
+	 * @return bool
+	 */
 	private static function is_query_var(string $key){
 		return  isset($_GET[$key]) || get_query_var($key);
 	}
+
+	/**
+	 * @param string $key
+	 * @return void
+	 */
 	private static function remove_query_var(string $key){
 		unset($_GET[$key]);
 	}
+
+	/**
+	 * @return void
+	 */
 	public static function init()
 	{
 		if(is_user_logged_in() && current_user_can('edit_posts')){

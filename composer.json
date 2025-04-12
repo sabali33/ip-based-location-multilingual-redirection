@@ -1,0 +1,29 @@
+{
+    "name": "sabali33/ip-location-multilingual-redirection",
+    "description": "A plugin that redirects a user based on his/her IP location for Polylang multilingual plugin\"",
+    "type": "wordpress-plugin",
+    "require-dev": {
+        "wp-coding-standards/wpcs": "^3.1",
+        "phpcompatibility/php-compatibility": "^9.3",
+        "phpcompatibility/phpcompatibility-wp": "^2.1",
+        "phpstan/phpstan": "^2.1",
+        "pestphp/pest": "^3.8"
+    },
+    "license": "MIT",
+    "autoload": {
+        "classmap": ["./src"]
+    },
+    "authors": [
+        {
+            "name": "Eliasu Abraman",
+            "email": "abraman.e@gmail.com"
+        }
+    ],
+    "require": {},
+    "config": {
+        "allow-plugins": {
+            "pestphp/pest-plugin": true,
+            "dealerdirect/phpcodesniffer-composer-installer": true
+        }
+    }
+}
