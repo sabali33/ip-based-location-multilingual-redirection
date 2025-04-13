@@ -5,9 +5,7 @@
     "require-dev": {
         "wp-coding-standards/wpcs": "^3.1",
         "phpcompatibility/php-compatibility": "^9.3",
-        "phpcompatibility/phpcompatibility-wp": "^2.1",
-        "phpstan/phpstan": "^2.1",
-        "pestphp/pest": "^1.23"
+        "phpcompatibility/phpcompatibility-wp": "^2.1"
     },
     "license": "MIT",
     "autoload": {
