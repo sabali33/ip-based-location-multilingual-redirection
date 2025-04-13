@@ -51,6 +51,16 @@ class Plugin_Settings {
 
 		// Add fields to the section
 		add_settings_field(
+			'geo_api_provider',
+			__('GEO API Provider', 'sagani-ip-location-redirection'),
+			[ $this, 'geo_api_provider_callback' ],
+			'sagani-ip-based-redirection-settings',
+			'sagani_ip_redirection_main_section',
+
+		);
+
+		// Add fields to the section
+		add_settings_field(
 			'geo_api_url',
 			__('GEO API url', 'sagani-ip-location-redirection'),
 			[ $this, 'geo_api_url_callback' ],
@@ -58,20 +68,61 @@ class Plugin_Settings {
 			'sagani_ip_redirection_main_section',
 
 		);
+
 	}
 
-	// Sanitize input before saving to database
-	public function sanitize_settings( $input ) {
+	/**
+	 * @param array{geo_api_url:string, geo_api_provider: string} $input
+	 * @return array
+	 */
+	public function sanitize_settings( array $input ): array
+	{
 		$sanitized = [];
+        $error = null;
+
+        $provider = sanitize_text_field( $input['geo_api_provider'] );
+        $api_url= sanitize_text_field( $input['geo_api_url'] );
+        $invalid_url_message = 'API is not valid';
+
+		switch ($provider){
+			case Geo_Api_Response::IP_GEO_LOCATION:
+                if(!str_contains($api_url, Geo_Api_Response::IP_GEO_LOCATION)){
+                    $error = $invalid_url_message;
+                }
+				break;
+			case Geo_Api_Response::IPINFO:
+				if(!str_contains($api_url, Geo_Api_Response::IPINFO)){
+					$error = $invalid_url_message;
+				}
+				break;
+			default:
+
+                if(!str_contains($api_url, Geo_Api_Response::IP_API_LOCATION)){
+	                $error = $invalid_url_message;
+                }
+                break;
+        }
+        if($error){
+	        add_settings_error(
+		        'sagani_ip_based_redirection_settings',          // Slug title of the setting
+		        'sagani_ip_redirection_error',             // Error ID
+		        $error,                        // Error message
+		        'error'                        // Type of message (error/warning/success)
+	        );
+        }
 		if ( isset( $input['geo_api_url'] ) ) {
 			$sanitized['geo_api_url'] = sanitize_text_field( $input['geo_api_url'] );
+		}
+		if ( isset( $input['geo_api_provider'] ) ) {
+			$sanitized['geo_api_provider'] = sanitize_text_field( $input['geo_api_provider'] );
 		}
 
 		return $sanitized;
 	}
 
 	// Render the settings page
-	public function create_admin_page() {
+	public function create_admin_page(): void
+	{
 		?>
 		<div class="wrap">
 			<h1><?php _e('IP-Based Location Redirection Settings', 'sagani-ip-location-redirection') ?></h1>
@@ -87,12 +138,14 @@ class Plugin_Settings {
 	}
 
 	// Section description
-	public function print_section_info() {
+	public function print_section_info(): void
+	{
 		printf("<p>%s</p>", __('Configure your plugin settings below:', 'sagani-ip-location-redirection') );
 	}
 
 	// Field callbacks (render form inputs)
-	public function geo_api_url_callback() {
+	public function geo_api_url_callback(): void
+	{
 		$options = get_option( 'sagani_ip_based_redirection_settings' );
 		$value = $options['geo_api_url'] ?? '';
 		echo '<div><input type="text" name="sagani_ip_based_redirection_settings[geo_api_url]" value="' . esc_attr( $value ) . '" class="regular-text"></div>';
@@ -108,6 +161,21 @@ class Plugin_Settings {
         </p>
         <?php
 	}
+
+	public function geo_api_provider_callback(): void
+	{
+		$options = get_option( 'sagani_ip_based_redirection_settings' );
+		$value = $options['geo_api_provider'] ?? '';
+        $providers = [Geo_Api_Response::IP_API_LOCATION, Geo_Api_Response::IP_GEO_LOCATION, Geo_Api_Response::IPINFO]
+        ?>
+        <select name="sagani_ip_based_redirection_settings[geo_api_provider]" id="geo-api-provider" class="regular-text">>
+            <?php foreach ($providers as $provider): ?>
+            <option value="<?php echo esc_attr($provider) ?>" <?php echo $value === $provider ? 'selected' : '' ?> > <?php echo ucfirst($provider); ?></option>
+            <?php endforeach;?>
+        </select>
+        <?php
+
+    }
 
 	public static function setting(string $key)
 	{
