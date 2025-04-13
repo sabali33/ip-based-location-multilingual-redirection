@@ -12,12 +12,8 @@ final class Plugin
 	 */
 	public static function setup(): void
 	{
-		if(!defined( 'GEO_API_URL')){
-			$api_url = getenv('GEO_API_URL');
-			if(!$api_url){
-				throw new Exception("You must define GEO_API_URL in your wp-config.php file");
-			}
-			define('GEO_API_URL' , $api_url);
+		if(!Plugin_Settings::setting('geo_api_url')){
+			throw new Exception("You must define GEO_API_URL in your wp-config.php file");
 		}
 	}
 
@@ -83,12 +79,11 @@ final class Plugin
 			return $cache;
 		}
 
-		$url = sprintf(GEO_API_URL, $ip_address);
+		$url = sprintf(Plugin_Settings::setting('geo_api_url'), $ip_address);
 
 		$response = file_get_contents($url);
 
 		if(!$response){
-
 			return[];
 		}
 
@@ -208,6 +203,10 @@ final class Plugin
 
 		$user_languages = self::user_languages($ip);
 
+		//When we have no languages returned
+		if(empty($user_languages)){
+			return;
+		}
 		$page_translations = self::current_page_translations();
 		$current_page_locale = self::current_page_locale();
 

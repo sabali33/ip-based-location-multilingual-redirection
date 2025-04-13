@@ -7,7 +7,7 @@ declare(strict_types=1);
  *  Plugin URI:  https://talents2germany.com
  *  Description: This plugin detects user location based on IP address and redirects the user to the right translated page
  *  Author:      Eliasu Abraman
- *  Text Domain: sabali33-ip-location-redirection
+ *  Text Domain: sagani-ip-location-redirection
  *  Domain Path: /languages
  *  License:     GPL v2 or later
  *  Requires    PHP: 8.0
@@ -18,6 +18,7 @@ namespace Sagani_IP_Location_Multilingual_Redirection;
 
 use Exception;
 use Sagani_IP_Location_Multilingual_Redirection\src\Plugin;
+use Sagani_IP_Location_Multilingual_Redirection\src\Plugin_Settings;
 use Throwable;
 
 if ( ! defined( 'ABSPATH' ) ) {
@@ -63,9 +64,11 @@ add_action(
 			);
 
 			Plugin::setup();
+			Plugin_Settings::init();
 
 			add_action('template_redirect', [Plugin::class, 'init']);
 			add_filter('pll_the_language_link', [Plugin::class, 'filter_switch_url']);
+
 
 		} catch ( Throwable|\Exception $exception ) {
 			Plugin::error_notice( $exception->getMessage() );
