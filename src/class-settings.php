@@ -4,6 +4,8 @@ declare(strict_types=1);
 
 namespace Sagani_IP_Location_Multilingual_Redirection\src;
 
+use Sagani_IP_Location_Multilingual_Redirection\src\dto\Geo_Api_Response;
+
 class Plugin_Settings {
 
 	private static Plugin_Settings $instance;

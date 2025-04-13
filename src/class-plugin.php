@@ -4,6 +4,8 @@ declare(strict_types=1);
 namespace Sagani_IP_Location_Multilingual_Redirection\src;
 
 use Exception;
+use Sagani_IP_Location_Multilingual_Redirection\src\dto\Geo_Api_Response;
+
 
 final class Plugin
 {
@@ -43,9 +45,6 @@ final class Plugin
 	 */
 	private static function user_Ip():?string
 	{
-		if(wp_get_environment_type() === 'local'){
-			return '41.155.60.149';
-		}
 		foreach ([
 			         'HTTP_CLIENT_IP',
 			         'HTTP_X_FORWARDED_FOR',
@@ -73,6 +72,7 @@ final class Plugin
 	 */
 	private static function user_languages(string $ip_address): array
 	{
+
 		$cache = get_transient($ip_address);
 
 		if($cache){
@@ -81,20 +81,19 @@ final class Plugin
 
 		$url = sprintf(Plugin_Settings::setting('geo_api_url'), $ip_address);
 
-		$response = file_get_contents($url);
+		$response = new Geo_Api_Response(file_get_contents($url), Plugin_Settings::setting('geo_api_provider'));
 
-		if(!$response){
+		if($response->failed()){
 			return[];
 		}
 
-		$data = json_decode($response, true);
+		$country_code =  $response->country_code();
+		$languages = Languages::get_language_by_country($country_code);
+		$languages = explode(',', $languages);
 
-		if ($data && isset($data['languages'])) {
-			$languages = explode(',', $data['languages']);
-			set_transient($ip_address, $languages, 60 * 60);
-			return $languages;
-		}
-		return [];
+		set_transient($ip_address, $languages, 60 * 60);
+
+		return $languages;
 	}
 
 	private static function current_page_translations(): array
