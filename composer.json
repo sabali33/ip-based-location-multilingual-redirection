@@ -7,7 +7,7 @@
         "phpcompatibility/php-compatibility": "^9.3",
         "phpcompatibility/phpcompatibility-wp": "^2.1",
         "phpstan/phpstan": "^2.1",
-        "pestphp/pest": "^3.8"
+        "pestphp/pest": "^1.23"
     },
     "license": "MIT",
     "autoload": {
@@ -19,7 +19,6 @@
             "email": "abraman.e@gmail.com"
         }
     ],
-    "require": {},
     "config": {
         "allow-plugins": {
             "pestphp/pest-plugin": true,
