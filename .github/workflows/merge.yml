@@ -25,11 +25,7 @@ jobs:
       - name: Set GitHub token for push
         run: |
           git remote set-url origin https://x-access-token:${{ secrets.GITHUB_TOKEN }}@github.com/${{ github.repository }}
-      - name: Remove .gitignore
-        run: |
-          rm -f .gitignore
-          git rm --cached .gitignore || true  # Ensure it's removed from index
-          git commit -am "Remove .gitignore" || echo "No changes to commit"
+
       - name: Set up PHP
         uses: shivammathur/setup-php@v2
         with:
@@ -54,13 +50,17 @@ jobs:
           git add .
           git commit -m "Auto-resolved conflicts using 'theirs'" || echo "No conflicts to resolve"
 
-      - name: Install composer
+      - name: Install composer dependencies
         run: |
           composer install --no-dev --classmap-authoritative 
           composer dump-autoload
-          git add .
-          git commit -m "Auto-commit composer updates" || echo "Auto commit composer updates"
-
+          git add . || echo "No files to add"
+          git commit -m "Auto-commit composer updates" || echo "No Auto commit composer updates"
+      - name: Remove .gitignore
+        run: |
+          rm -f .gitignore
+          git rm --cached .gitignore || true  # Ensure it's removed from index
+          git commit -am "Remove .gitignore" || echo "No changes to commit"
       - name: Delete workflow file from target branch
         run: |
           git rm .github/workflows/merge.yml
