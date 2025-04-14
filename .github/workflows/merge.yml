@@ -46,11 +46,11 @@ jobs:
 
       - name: Merge source branch
         run: |
-          git merge origin/main --no-ff -m "Auto-merge from feature-branch"
+          git merge main --no-ff -m "Auto-merge from feature-branch"
 
       - name: Force merge with conflict resolution
         run: |
-          git merge origin/main --strategy-option theirs --no-edit || true
+          git merge main --strategy-option theirs --no-edit || true
           git add .
           git commit -m "Auto-resolved conflicts using 'theirs'" || echo "No conflicts to resolve"
 
