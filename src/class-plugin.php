@@ -80,15 +80,22 @@ final class Plugin
 		}
 
 		$url = sprintf(Plugin_Settings::setting('geo_api_url'), $ip_address);
+		$response = wp_remote_get($url);
 
-		$response = new Geo_Api_Response(file_get_contents($url), Plugin_Settings::setting('geo_api_provider'));
+		if(is_wp_error($response)){
+			return [];
+		}
 
-		if($response->failed()){
+		$response_dto = new Geo_Api_Response(wp_remote_retrieve_body($response), Plugin_Settings::setting('geo_api_provider'), $response['response']['code']);
+
+		if($response_dto->failed()){
 			return[];
 		}
 
-		$country_code =  $response->country_code();
+		$country_code =  $response_dto->country_code();
+
 		$languages = Languages::get_language_by_country($country_code);
+
 		$languages = explode(',', $languages);
 
 		set_transient($ip_address, $languages, 60 * 60);

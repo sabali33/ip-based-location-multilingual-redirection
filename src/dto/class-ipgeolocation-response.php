@@ -11,11 +11,11 @@ class Ipgeolocation_Response implements Geo_API_Response_Interface
 	 */
 	private array|false $response;
 	/**
-	 * @param mixed $response
+	 * @param string $response
 	 */
-	public function __construct(mixed $response)
+	public function __construct(string $response)
 	{
-		$this->response = $response;
+		$this->response = json_decode($response, true);
 	}
 
 	/**

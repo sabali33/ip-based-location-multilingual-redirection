@@ -15,7 +15,7 @@ class Ipinfo_Response implements Geo_API_Response_Interface
 	 */
 	public function __construct(string $response)
 	{
-		$this->response = unserialize($response);
+		$this->response =  json_decode($response, true);
 	}
 
 	/**
@@ -34,6 +34,8 @@ class Ipinfo_Response implements Geo_API_Response_Interface
 		if(!$this->response){
 			return true;
 		}
-		return $this->response['status'] === 404 || $this->response['status'] === 'fail';
+		$header = wp_remote_retrieve_headers($this->response);
+
+		return isset($this->response['status']) && ($this->response['status'] === 404 || $this->response['status'] === 'fail');
 	}
 }
