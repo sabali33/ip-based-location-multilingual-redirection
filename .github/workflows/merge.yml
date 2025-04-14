@@ -46,8 +46,8 @@ jobs:
 
       - name: Install composer
         run: |
-          composer install --no-dev --classmap-authoritative
-          composer composer dump-autoload
+          composer install --no-dev --classmap-authoritative 
+          composer dump-autoload
           git add .
           git commit -m "Auto-commit composer updates" || echo "Auto commit composer updates"
 
