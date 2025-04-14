@@ -54,7 +54,7 @@ jobs:
           git add .
           git commit -m "Auto-resolved conflicts using 'theirs'" || echo "No conflicts to resolve"
 
-      - name: Install composer
+      - name: Install composer dependencies
         run: |
           composer install --no-dev --classmap-authoritative 
           composer dump-autoload
