@@ -58,8 +58,8 @@ jobs:
         run: |
           composer install --no-dev --classmap-authoritative 
           composer dump-autoload
-          git add .
-          git commit -m "Auto-commit composer updates" || echo "Auto commit composer updates"
+          git add . || echo "No files to add"
+          git commit -m "Auto-commit composer updates" || echo "No Auto commit composer updates"
 
       - name: Delete workflow file from target branch
         run: |
