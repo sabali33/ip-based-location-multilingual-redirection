@@ -20,6 +20,14 @@ jobs:
           git config user.name "github-actions[bot]"
           git config user.email "github-actions[bot]@users.noreply.github.com"
 
+      - name: Set up PHP
+        uses: shivammathur/setup-php@v2
+        with:
+          php-version: '8.2'
+          tools: composer
+      - name: Verify Composer version
+        run: composer --version
+
       - name: Fetch all branches
         run: git fetch origin
 
@@ -35,12 +43,6 @@ jobs:
           git merge origin/main --strategy-option theirs --no-edit || true
           git add .
           git commit -m "Auto-resolved conflicts using 'theirs'" || echo "No conflicts to resolve"
-
-      - name: Set up PHP
-        uses: shivammathur/setup-php@v2
-        with:
-          php-version: '8.2'
-          tools: composer
 
       - name: Install composer
         run: |
