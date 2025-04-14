@@ -1,4 +1,4 @@
-name: Merge and Remove .gitignore
+name: Update production branch
 
 on:
   push:
@@ -36,10 +36,16 @@ jobs:
           git add .
           git commit -m "Auto-resolved conflicts using 'theirs'" || echo "No conflicts to resolve"
 
+      - name: Set up PHP
+        uses: shivammathur/setup-php@v2
+        with:
+          php-version: '8.2'
+          tools: composer
+
       - name: Install composer
         run: |
-          vendor/bin/composer install --no-dev --classmap-authoritative
-          vendor/bin/composer composer dump-autoload
+          composer install --no-dev --classmap-authoritative
+          composer composer dump-autoload
           git add .
           git commit -m "Auto-commit composer updates" || echo "Auto commit composer updates"
 
