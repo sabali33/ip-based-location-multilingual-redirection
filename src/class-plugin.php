@@ -15,7 +15,7 @@ final class Plugin
 	public static function setup(): void
 	{
 		if(!Plugin_Settings::setting('geo_api_url')){
-			throw new Exception("You must define GEO_API_URL in your wp-config.php file");
+			self::error_notice('You must set you geo api credentials at Settings >> IP-based redirection');
 		}
 	}
 

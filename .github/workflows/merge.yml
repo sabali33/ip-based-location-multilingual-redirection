@@ -1,0 +1,70 @@
+name: Update production branch
+
+on:
+  push:
+    branches:
+      - main  # Replace with your source branch
+permissions:
+  contents: write
+
+jobs:
+  merge-and-remove:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout the repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0  # Important for accessing other branches
+
+      - name: Set up Git
+        run: |
+          git config user.name "${{ secrets.GIT_USER_NAME }}"
+          git config user.email "${{ secrets.GIT_USER_EMAIL }}"
+
+      - name: Set GitHub token for push
+        run: |
+          git remote set-url origin https://x-access-token:${{ secrets.GITHUB_TOKEN }}@github.com/${{ github.repository }}
+      - name: Remove .gitignore
+        run: |
+          rm -f .gitignore
+          git rm --cached .gitignore || true  # Ensure it's removed from index
+          git commit -am "Remove .gitignore" || echo "No changes to commit"
+      - name: Set up PHP
+        uses: shivammathur/setup-php@v2
+        with:
+          php-version: '8.2'
+          tools: composer
+      - name: Verify Composer version
+        run: composer --version
+
+      - name: Fetch all branches
+        run: git fetch origin
+
+      - name: Checkout target branch
+        run: git checkout prod
+
+      - name: Merge source branch
+        run: |
+          git merge main --no-ff -m "Auto-merge from feature-branch"
+
+      - name: Force merge with conflict resolution
+        run: |
+          git merge main --strategy-option theirs --no-edit || true
+          git add .
+          git commit -m "Auto-resolved conflicts using 'theirs'" || echo "No conflicts to resolve"
+
+      - name: Install composer
+        run: |
+          composer install --no-dev --classmap-authoritative 
+          composer dump-autoload
+          git add .
+          git commit -m "Auto-commit composer updates" || echo "Auto commit composer updates"
+
+      - name: Delete workflow file from target branch
+        run: |
+          git rm .github/workflows/merge.yml
+          git commit -m "Remove workflow from target branch" || echo "No changes to commit"
+
+      - name: Push changes
+        run: git push origin prod
