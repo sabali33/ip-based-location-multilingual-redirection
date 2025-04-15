@@ -40,10 +40,6 @@ jobs:
       - name: Checkout target branch
         run: git checkout prod
 
-      - name: Merge source branch
-        run: |
-          git merge main --no-ff -m "Auto-merge from feature-branch"
-
       - name: Force merge with conflict resolution
         run: |
           git merge main --strategy-option theirs --no-edit || true
@@ -59,12 +55,12 @@ jobs:
       - name: Remove .gitignore
         run: |
           rm -f .gitignore
-          git rm --cached .gitignore || true  # Ensure it's removed from index
+          rm .gitignore || true  # Ensure it's removed from index
           git commit -am "Remove .gitignore" || echo "No changes to commit"
       - name: Delete workflow file from target branch
         run: |
           if [ -f .github/workflows/merge.yml ]; then
-            git rm .github/workflows/merge.yml
+            rm -f .github/workflows/merge.yml
           fi
           git commit -m "Remove workflow from target branch" || echo "No changes to commit"
 
