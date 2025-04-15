@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 /**
  *  Plugin Name: IP Location Redirection
- *  Plugin URI:  https://talents2germany.com
+ *  Plugin URI:  https://wordpress.org/plugins/ip-based-location-redirection
  *  Description: This plugin detects user location based on IP address and redirects the user to the right translated page
  *  Author:      Eliasu Abraman
  *  Text Domain: ip-location-polylang-redirection
