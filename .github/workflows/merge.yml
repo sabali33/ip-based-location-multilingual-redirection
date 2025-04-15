@@ -63,7 +63,9 @@ jobs:
           git commit -am "Remove .gitignore" || echo "No changes to commit"
       - name: Delete workflow file from target branch
         run: |
-          git rm .github/workflows/merge.yml
+          if [ -f .github/workflows/merge.yml ]; then
+            git rm .github/workflows/merge.yml
+          fi
           git commit -m "Remove workflow from target branch" || echo "No changes to commit"
 
       - name: Push changes
