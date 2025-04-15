@@ -1,12 +1,35 @@
 <?php
+/**
+ * Languages Class
+ *
+ * Provides a static method to retrieve the primary language(s) spoken in a country,
+ * based on its ISO 2-letter country code.
+ *
+ * This mapping is useful for geo-location-based redirection or localization features.
+ *
+ * @package Sagani_IP_Location_Multilingual_Redirection\Geo
+ */
 
 declare(strict_types=1);
 
 namespace Sagani_IP_Location_Multilingual_Redirection\src;
 
+/**
+ * Provides mapping for geo-location-based redirection.
+ */
 class Languages {
-	public static function get_language_by_country(string $country): string {
-		$map = [
+
+	/**
+	 * Get language(s) spoken in a given country using its ISO 2-letter country code.
+	 *
+	 * The method returns a comma-separated list of language codes (ISO 639-1 or other relevant standards).
+	 * If the country code is unknown, the default language returned is 'en' (English).
+	 *
+	 * @param string $country ISO 3166-1 alpha-2 country code (e.g., 'US', 'DE').
+	 * @return string Comma-separated list of language codes (e.g., "en", "de,fr").
+	 */
+	public static function get_language_by_country( string $country ): string {
+		$map = array(
 			'AF' => 'ps,uz,tur',
 			'AL' => 'sq',
 			'DZ' => 'ar',
@@ -197,10 +220,9 @@ class Languages {
 			'VN' => 'vi',
 			'YE' => 'ar',
 			'ZM' => 'en',
-			'ZW' => 'en,sn,nd'
-		];
+			'ZW' => 'en,sn,nd',
+		);
 
-		return $map[strtoupper($country)] ?? 'en'; // Default fallback
+		return $map[ strtoupper( $country ) ] ?? 'en'; // Default fallback.
 	}
-
 }
