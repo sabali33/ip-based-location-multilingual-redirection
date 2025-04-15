@@ -143,7 +143,7 @@ final class Plugin
 		return $closure();
 	}
 
-	private static function current_page_locale(): string
+	private static function current_page_locale(): array|\PLL_Language|bool|int|string
 	{
 		switch (true) {
 			case is_singular(['post', 'page']):
