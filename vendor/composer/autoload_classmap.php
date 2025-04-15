@@ -9,7 +9,7 @@ return array(
     'Composer\\InstalledVersions' => $vendorDir . '/composer/InstalledVersions.php',
     'Sagani_IP_Location_Multilingual_Redirection\\src\\Languages' => $baseDir . '/src/class-languages.php',
     'Sagani_IP_Location_Multilingual_Redirection\\src\\Plugin' => $baseDir . '/src/class-plugin.php',
-    'Sagani_IP_Location_Multilingual_Redirection\\src\\Plugin_Settings' => $baseDir . '/src/class-settings.php',
+    'Sagani_IP_Location_Multilingual_Redirection\\src\\Settings' => $baseDir . '/src/class-settings.php',
     'Sagani_IP_Location_Multilingual_Redirection\\src\\dto\\Geo_API_Response_Interface' => $baseDir . '/src/dto/interface-geo-api-response.php',
     'Sagani_IP_Location_Multilingual_Redirection\\src\\dto\\Geo_Api_Response' => $baseDir . '/src/dto/class-geo-api-response.php',
     'Sagani_IP_Location_Multilingual_Redirection\\src\\dto\\Ip_API_Response' => $baseDir . '/src/dto/class-ip-api-response.php',

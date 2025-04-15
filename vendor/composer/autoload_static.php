@@ -10,7 +10,7 @@ class ComposerStaticInit149e9eb8c528c79910b89ba461f46a30
         'Composer\\InstalledVersions' => __DIR__ . '/..' . '/composer/InstalledVersions.php',
         'Sagani_IP_Location_Multilingual_Redirection\\src\\Languages' => __DIR__ . '/../..' . '/src/class-languages.php',
         'Sagani_IP_Location_Multilingual_Redirection\\src\\Plugin' => __DIR__ . '/../..' . '/src/class-plugin.php',
-        'Sagani_IP_Location_Multilingual_Redirection\\src\\Plugin_Settings' => __DIR__ . '/../..' . '/src/class-settings.php',
+        'Sagani_IP_Location_Multilingual_Redirection\\src\\Settings' => __DIR__ . '/../..' . '/src/class-settings.php',
         'Sagani_IP_Location_Multilingual_Redirection\\src\\dto\\Geo_API_Response_Interface' => __DIR__ . '/../..' . '/src/dto/interface-geo-api-response.php',
         'Sagani_IP_Location_Multilingual_Redirection\\src\\dto\\Geo_Api_Response' => __DIR__ . '/../..' . '/src/dto/class-geo-api-response.php',
         'Sagani_IP_Location_Multilingual_Redirection\\src\\dto\\Ip_API_Response' => __DIR__ . '/../..' . '/src/dto/class-ip-api-response.php',
