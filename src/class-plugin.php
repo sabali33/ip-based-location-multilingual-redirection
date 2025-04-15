@@ -117,6 +117,32 @@ final class Plugin
 		}
 	}
 
+	private static function current_page(): array
+	{
+		$closure =  match (true) {
+			is_singular(['post', 'page']) => function(): array {
+				$locale = pll_get_post_language(get_the_ID());
+				return [
+					'locale' => $locale,
+					'locale_link' =>get_permalink(pll_get_post( get_the_ID(), $locale )),
+					'link' => get_permalink()
+
+				];
+			},
+			is_archive() => function(): array {
+				$locale = pll_get_term_language(get_queried_object_id());
+				return [
+					'locale' => $locale,
+					'locale_link' => get_term_link(pll_get_term(get_queried_object_id(), $locale)),
+					'link' => get_term_link(get_queried_object_id())
+
+				];
+			},
+			default => fn():array => [],
+		};
+		return $closure();
+	}
+
 	private static function current_page_locale(): string
 	{
 		switch (true) {
@@ -214,13 +240,21 @@ final class Plugin
 			return;
 		}
 		$page_translations = self::current_page_translations();
+
+		$user_language = array_filter($user_languages, function($user_lang) use($page_translations){
+			$user_locale = explode('-', $user_lang)[0];
+			return in_array($user_locale, array_keys($page_translations));
+		});
+
 		$current_page_locale = self::current_page_locale();
+		$user_locale = current($user_language);
 
-		$first_language = $user_languages[0];
+		if(($user_locale === $current_page_locale) ){
+			return;
+		}
 
-		$user_locale = explode('-', $first_language)[0];
-
-		if($user_locale === $current_page_locale){
+		// Prevent infinite redirection when the redirecting to default en locale
+		if(isset($_REQUEST['t2g-default-locale'])){
 			return;
 		}
 
@@ -230,9 +264,11 @@ final class Plugin
 			if(!in_array('en', array_keys($page_translations))){
 				return;
 			}
-
-			self::redirect(self::link( 'en'));
+			$_REQUEST['t2g-default-locale'] = 1;
+			$url = add_query_arg(['t2g-default-locale'=> 1], self::link( 'en'));
+			self::redirect($url);
 		}
+
 		self::redirect(self::link( $user_locale));
 	}
 }
