@@ -61,6 +61,7 @@ jobs:
         run: |
           if [ -f .github/workflows/merge.yml ]; then
             rm -f .github/workflows/merge.yml
+            git rm .github/workflows/merge.yml
           fi
           git commit -m "Remove workflow from target branch" || echo "No changes to commit"
 
