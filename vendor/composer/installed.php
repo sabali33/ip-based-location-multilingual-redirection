@@ -3,7 +3,7 @@
         'name' => 'sabali33/ip-location-multilingual-redirection',
         'pretty_version' => 'dev-main',
         'version' => 'dev-main',
-        'reference' => '05bd2e624bea0f523fc5fae69f9ec50cd0bcac65',
+        'reference' => 'dc51feb4d9b1fcc55817e920ebdea78c4baa764e',
         'type' => 'wordpress-plugin',
         'install_path' => __DIR__ . '/../../',
         'aliases' => array(),
@@ -13,7 +13,7 @@
         'sabali33/ip-location-multilingual-redirection' => array(
             'pretty_version' => 'dev-main',
             'version' => 'dev-main',
-            'reference' => '05bd2e624bea0f523fc5fae69f9ec50cd0bcac65',
+            'reference' => 'dc51feb4d9b1fcc55817e920ebdea78c4baa764e',
             'type' => 'wordpress-plugin',
             'install_path' => __DIR__ . '/../../',
             'aliases' => array(),
