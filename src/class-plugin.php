@@ -231,6 +231,9 @@ final class Plugin {
 	 * @return string
 	 */
 	public static function filter_switch_url( string $url ) {
+		if( empty($url)){
+			$url = '/';
+		}
 		return add_query_arg( array( 'from_switcher' => 1 ), $url );
 	}
 
