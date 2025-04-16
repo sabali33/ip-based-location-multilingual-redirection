@@ -34,7 +34,13 @@ class Ip_API_Response implements Geo_API_Response_Interface {
 	 * @param string $response Raw JSON response string from the IP-API.com service.
 	 */
 	public function __construct( string $response ) {
-		$this->response = json_decode( $response, true );
+		try{
+			$this->response = json_decode( $response, true );
+		}catch (\Throwable $typeError){
+			var_dump($response);
+			$this->response = false;
+		}
+
 	}
 
 	/**

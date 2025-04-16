@@ -47,7 +47,7 @@ class Ipinfo_Response implements Geo_API_Response_Interface {
 	 * @return string Country code.
 	 */
 	public function country_code(): string {
-		return $this->response['country'];
+		return $this->response['country'] ?? '';
 	}
 
 	/**

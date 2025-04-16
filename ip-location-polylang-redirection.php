@@ -80,6 +80,8 @@ add_action(
 
 			add_action( 'template_redirect', array( Plugin::class, 'init' ) );
 			add_filter( 'pll_the_language_link', array( Plugin::class, 'filter_switch_url' ) );
+			$file = plugin_basename( __FILE__ );
+			add_action( "uninstall_$file", array( Plugin::class, 'uninstall' ) );
 
 		} catch ( Throwable | \Exception $exception ) {
 			Plugin::error_notice( $exception->getMessage() );
