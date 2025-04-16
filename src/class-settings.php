@@ -20,6 +20,7 @@ use Sagani_IP_Location_Multilingual_Redirection\src\dto\Geo_Api_Response;
  * Handles plugin settings page and configuration storage.
  */
 class Settings {
+	const SAGANI_IP_BASED_REDIRECTION_SETTINGS = 'sagani_ip_based_redirection_settings';
 
 	/**
 	 * Singleton instance of the settings class.
@@ -73,7 +74,7 @@ class Settings {
 	public function register_plugin_settings(): void {
 		register_setting(
 			'sagani_ip_based_redirection_settings_group',
-			'sagani_ip_based_redirection_settings',
+			self::SAGANI_IP_BASED_REDIRECTION_SETTINGS,
 			array( $this, 'sanitize_settings' )
 		);
 
@@ -135,11 +136,12 @@ class Settings {
 
 		if ( $error ) {
 			add_settings_error(
-				'sagani_ip_based_redirection_settings',
+				self::SAGANI_IP_BASED_REDIRECTION_SETTINGS,
 				'sagani_ip_redirection_error',
 				$error,
 				'error'
 			);
+            return [];
 		}
 
 		if ( isset( $input['geo_api_url'] ) ) {
@@ -191,7 +193,7 @@ class Settings {
 	 * @return void
 	 */
 	public function geo_api_url_callback(): void {
-		$options = get_option( 'sagani_ip_based_redirection_settings' );
+		$options = get_option(self::SAGANI_IP_BASED_REDIRECTION_SETTINGS);
 		$value   = $options['geo_api_url'] ?? '';
 		echo '<div><input type="text" name="sagani_ip_based_redirection_settings[geo_api_url]" value="' . esc_attr( $value ) . '" class="regular-text"></div>';
 		echo '<i>' . esc_html__( 'You can get a Geo API URL from these sites:', 'ip-location-polylang-redirection' ) . '</i>';
@@ -257,7 +259,7 @@ class Settings {
 	 * @return void
 	 */
 	public function geo_api_provider_callback(): void {
-		$options   = get_option( 'sagani_ip_based_redirection_settings' );
+		$options   = get_option(self::SAGANI_IP_BASED_REDIRECTION_SETTINGS);
 		$value     = $options['geo_api_provider'] ?? '';
 		$providers = array(
 			Geo_Api_Response::IP_API_LOCATION,
@@ -281,8 +283,19 @@ class Settings {
 	 * @param string $key The setting key to retrieve.
 	 * @return string|false The setting value or false if not found.
 	 */
-	public static function setting( string $key ) {
-		$options = get_option( 'sagani_ip_based_redirection_settings' );
+	public static function setting( string $key ): bool|string
+	{
+		$options = get_option(self::SAGANI_IP_BASED_REDIRECTION_SETTINGS);
 		return $options[ $key ] ?? false;
+	}
+
+	/**
+     * A callback function to run when the plugin is uninstalled.
+     *
+	 * @return void
+	 */
+	public static function uninstall(): void
+	{
+		update_option(self::SAGANI_IP_BASED_REDIRECTION_SETTINGS, null);
 	}
 }

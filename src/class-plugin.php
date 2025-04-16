@@ -115,6 +115,8 @@ final class Plugin {
 			$response['response']['code']
 		);
 
+
+
 		if ( $response_dto->failed() ) {
 			return array();
 		}
@@ -146,34 +148,6 @@ final class Plugin {
 			default:
 				return array( 'en' => get_queried_object_id() );
 		}
-	}
-
-	/**
-	 * Get details about the current page including its locale and URLs.
-	 *
-	 * @return array
-	 */
-	private static function current_page(): array {
-		$closure = match ( true ) {
-			is_singular( array( 'post', 'page' ) ) => function (): array {
-				$locale = pll_get_post_language( get_the_ID() );
-				return array(
-					'locale'      => $locale,
-					'locale_link' => get_permalink( pll_get_post( get_the_ID(), $locale ) ),
-					'link'        => get_permalink(),
-				);
-			},
-			is_archive() => function (): array {
-				$locale = pll_get_term_language( get_queried_object_id() );
-				return array(
-					'locale'      => $locale,
-					'locale_link' => get_term_link( pll_get_term( get_queried_object_id(), $locale ) ),
-					'link'        => get_term_link( get_queried_object_id() ),
-				);
-			},
-			default => fn(): array => array(),
-		};
-		return $closure();
 	}
 
 	/**
@@ -263,6 +237,10 @@ final class Plugin {
 	 * @return void
 	 */
 	public static function init() {
+		if ( isset( $_REQUEST['t2g-default-locale'] ) ) { // phpcs:ignore WordPress.Security.NonceVerification.Recommended
+			return;
+		}
+
 		if ( is_user_logged_in() && current_user_can( 'edit_posts' ) ) {
 			return;
 		}
@@ -300,10 +278,6 @@ final class Plugin {
 		$user_locale         = current( $user_language );
 
 		if ( ( $user_locale === $current_page_locale ) ) {
-			return;
-		}
-
-		if ( isset( $_REQUEST['t2g-default-locale'] ) ) { // phpcs:ignore WordPress.Security.NonceVerification.Recommended
 			return;
 		}
 
