@@ -41,7 +41,7 @@ if ( ! defined( 'SAGANI_IP_REDIRECTION_PATH' ) ) {
 }
 
 /**
- * Requires autoload file if it exists.
+ * Requires an autoload file if it exists.
  *
  * @throws Exception Throws an exception when no autoload.php file is found.
  */
@@ -80,6 +80,7 @@ add_action(
 
 			add_action( 'template_redirect', array( Plugin::class, 'init' ) );
 			add_filter( 'pll_the_language_link', array( Plugin::class, 'filter_switch_url' ) );
+
 			$file = plugin_basename( __FILE__ );
 			add_action( "uninstall_$file", array( Plugin::class, 'uninstall' ) );
 

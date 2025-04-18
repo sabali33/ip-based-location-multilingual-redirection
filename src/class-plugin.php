@@ -115,8 +115,6 @@ final class Plugin {
 			$response['response']['code']
 		);
 
-
-
 		if ( $response_dto->failed() ) {
 			return array();
 		}
@@ -204,8 +202,8 @@ final class Plugin {
 	 * @param string $url Original URL.
 	 * @return string
 	 */
-	public static function filter_switch_url( string $url ) {
-		if( empty($url)){
+	public static function filter_switch_url( string $url ): string {
+		if ( empty( $url ) ) {
 			$url = '/';
 		}
 		return add_query_arg( array( 'from_switcher' => 1 ), $url );
@@ -217,7 +215,7 @@ final class Plugin {
 	 * @param string $key Query variable key.
 	 * @return bool
 	 */
-	private static function is_query_var( string $key ) {
+	private static function is_query_var( string $key ): bool {
 		return isset( $_GET[ $key ] ) || get_query_var( $key ); // phpcs:ignore WordPress.Security.NonceVerification.Recommended
 	}
 
@@ -227,7 +225,7 @@ final class Plugin {
 	 * @param string $key Query variable key.
 	 * @return void
 	 */
-	private static function remove_query_var( string $key ) {
+	private static function remove_query_var( string $key ): void {
 		unset( $_GET[ $key ] );
 	}
 
@@ -236,7 +234,7 @@ final class Plugin {
 	 *
 	 * @return void
 	 */
-	public static function init() {
+	public static function init(): void {
 		if ( isset( $_REQUEST['t2g-default-locale'] ) ) { // phpcs:ignore WordPress.Security.NonceVerification.Recommended
 			return;
 		}
@@ -248,7 +246,7 @@ final class Plugin {
 		if ( is_front_page() && is_home() ) {
 			return;
 		}
-
+		$page_translations = self::current_page_translations();
 		$from_switcher = self::is_query_var( 'from_switcher' ); // phpcs:ignore;
 
 		if ( $from_switcher ) {
@@ -264,18 +262,20 @@ final class Plugin {
 			return;
 		}
 
-		$page_translations = self::current_page_translations();
-
-		$user_language = array_filter(
-			$user_languages,
-			function ( $user_lang ) use ( $page_translations ) {
-				$user_locale = explode( '-', $user_lang )[0];
-				return in_array( $user_locale, array_keys( $page_translations ), true );
+		if ( is_multisite() && is_main_site() ) {
+			$found_languages = self::find_user_locales( $user_languages, Settings::supported_languages() );
+			if ( $found_languages ) {
+				$user_languages = $found_languages;
 			}
-		);
+			$url = Settings::auto_redirect_locale_url( current( $user_languages ) );
+
+			self::redirect( $url );
+		}
+
+		$user_languages = self::find_user_locales( $user_languages, $page_translations );
 
 		$current_page_locale = self::current_page_locale();
-		$user_locale         = current( $user_language );
+		$user_locale         = current( $user_languages );
 
 		if ( ( $user_locale === $current_page_locale ) ) {
 			return;
@@ -291,5 +291,21 @@ final class Plugin {
 		}
 
 		self::redirect( self::link( $user_locale ) );
+	}
+
+	/**
+	 * Find locale from a list of locales.
+	 *
+	 * @param array $user_languages User IP location locales.
+	 * @param array $page_translations Locales supported.
+	 * @return array
+	 */
+	private static function find_user_locales( array $user_languages, array $page_translations ): array {
+		return array_filter(
+			$user_languages,
+			function ( $user_lang ) use ( $page_translations ) {
+				return in_array( $user_lang, array_keys( $page_translations ), true );
+			}
+		);
 	}
 }

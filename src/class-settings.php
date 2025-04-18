@@ -21,6 +21,7 @@ use Sagani_IP_Location_Multilingual_Redirection\src\dto\Geo_Api_Response;
  */
 class Settings {
 	const SAGANI_IP_BASED_REDIRECTION_SETTINGS = 'sagani_ip_based_redirection_settings';
+	const AUTO_REDIRECT_LOCALE_URL             = 'auto_redirect_locale_url_';
 
 	/**
 	 * Singleton instance of the settings class.
@@ -31,7 +32,7 @@ class Settings {
 
 	/**
 	 * Constructor.
-	 * Registers admin hooks for menu and settings.
+	 * Registers admin hooks for a menu and settings.
 	 */
 	private function __construct() {
 		add_action( 'admin_menu', array( $this, 'add_admin_menu' ) );
@@ -100,12 +101,37 @@ class Settings {
 			'ip-based-redirection-settings',
 			'sagani_ip_redirection_main_section'
 		);
+
+		if ( is_multisite() && is_main_site() ) {
+			add_settings_section(
+				'sagani_ip_redirection_multisite_section',
+				__( 'Multisite Redirection Settings', 'ip-location-polylang-redirection' ),
+				array( $this, 'print_section_info' ),
+				'ip-based-redirection-settings',
+				array( 'is_multisite' => true )
+			);
+			$supported_translations = self::supported_languages();
+			foreach ( $supported_translations as $supported_translation ) {
+				add_settings_field(
+					"auto_redirect_locale_url_$supported_translation",
+					sprintf(
+							/* translators: %s: locale  */
+						__( 'Auto redirect url for <i>%s</i> users ', 'ip-location-polylang-redirection' ),
+						$supported_translation
+					),
+					array( $this, 'auto_redirect_locale_url_mapping_callback' ),
+					'ip-based-redirection-settings',
+					'sagani_ip_redirection_multisite_section',
+					array( 'locale' => $supported_translation ),
+				);
+			}
+		}
 	}
 
 	/**
 	 * Sanitizes the plugin settings.
 	 *
-	 * @param array{geo_api_url: string, geo_api_provider: string} $input Input data.
+	 * @param array{geo_api_url: string, geo_api_provider: string, auto_redirect_locale_url_:string } $input Input data.
 	 * @return array Sanitized settings.
 	 */
 	public function sanitize_settings( array $input ): array {
@@ -134,6 +160,19 @@ class Settings {
 				break;
 		}
 
+		foreach ( self::supported_languages() as $language ) {
+			$option_key = "auto_redirect_locale_url_$language";
+			$value      = isset( $_POST[ $option_key ] ) ? sanitize_text_field( wp_unslash( $_POST[ $option_key ] ) ) : '';
+
+			if ( ! wp_parse_url( $value, PHP_URL_HOST ) ) {
+				$error = $invalid_url_message;
+				continue;
+			}
+			if ( isset( $_POST[ $option_key ] ) ) {
+				$sanitized[ $option_key ] = $value;
+			}
+		}
+
 		if ( $error ) {
 			add_settings_error(
 				self::SAGANI_IP_BASED_REDIRECTION_SETTINGS,
@@ -141,7 +180,7 @@ class Settings {
 				$error,
 				'error'
 			);
-            return [];
+			return array();
 		}
 
 		if ( isset( $input['geo_api_url'] ) ) {
@@ -178,12 +217,20 @@ class Settings {
 	/**
 	 * Prints a short description above the settings section.
 	 *
+	 * @param array $args Passed arguments from the add section function.
 	 * @return void
 	 */
-	public function print_section_info(): void {
+	public function print_section_info( array $args ): void {
+		if ( isset( $args['is_multisite'] ) && $args['is_multisite'] ) {
+			printf(
+				'<p>%s</p>',
+				esc_html__( 'Configure Multisite redirection:', 'ip-location-polylang-redirection' )
+			);
+			return;
+		}
 		printf(
 			'<p>%s</p>',
-			esc_html__( 'Configure your plugin settings below:', 'ip-location-polylang-redirection' )
+			esc_html__( 'Configure plugin settings below:', 'ip-location-polylang-redirection' )
 		);
 	}
 
@@ -193,7 +240,7 @@ class Settings {
 	 * @return void
 	 */
 	public function geo_api_url_callback(): void {
-		$options = get_option(self::SAGANI_IP_BASED_REDIRECTION_SETTINGS);
+		$options = get_option( self::SAGANI_IP_BASED_REDIRECTION_SETTINGS );
 		$value   = $options['geo_api_url'] ?? '';
 		echo '<div><input type="text" name="sagani_ip_based_redirection_settings[geo_api_url]" value="' . esc_attr( $value ) . '" class="regular-text"></div>';
 		echo '<i>' . esc_html__( 'You can get a Geo API URL from these sites:', 'ip-location-polylang-redirection' ) . '</i>';
@@ -254,13 +301,30 @@ class Settings {
 	}
 
 	/**
+	 * A callback to display input fields for supported site locale.
+	 *
+	 * @param array $args Arguments from add settings function call.
+	 * @return void
+	 */
+	public function auto_redirect_locale_url_mapping_callback( array $args ): void {
+		['locale' => $locale] = $args;
+		$option_key           = self::AUTO_REDIRECT_LOCALE_URL . "$locale";
+		$value                = self::setting( $option_key );
+
+		?>
+
+		<input type="url" name="<?php echo esc_attr( $option_key ); ?>" value="<?php echo esc_attr( $value ); ?>" class="regular-text" placeholder="https://..." />
+
+		<?php
+	}
+
+	/**
 	 * Renders the select field for choosing the API provider.
 	 *
 	 * @return void
 	 */
 	public function geo_api_provider_callback(): void {
-		$options   = get_option(self::SAGANI_IP_BASED_REDIRECTION_SETTINGS);
-		$value     = $options['geo_api_provider'] ?? '';
+		$value     = self::setting( 'geo_api_provider' );
 		$providers = array(
 			Geo_Api_Response::IP_API_LOCATION,
 			Geo_Api_Response::IP_GEO_LOCATION,
@@ -283,19 +347,42 @@ class Settings {
 	 * @param string $key The setting key to retrieve.
 	 * @return string|false The setting value or false if not found.
 	 */
-	public static function setting( string $key ): bool|string
-	{
-		$options = get_option(self::SAGANI_IP_BASED_REDIRECTION_SETTINGS);
+	public static function setting( string $key ): bool|string {
+		$options = get_option( self::SAGANI_IP_BASED_REDIRECTION_SETTINGS );
 		return $options[ $key ] ?? false;
 	}
 
 	/**
-     * A callback function to run when the plugin is uninstalled.
-     *
+	 * A callback function to run when the plugin is uninstalled.
+	 *
 	 * @return void
 	 */
-	public static function uninstall(): void
-	{
-		update_option(self::SAGANI_IP_BASED_REDIRECTION_SETTINGS, null);
+	public static function uninstall(): void {
+		update_option( self::SAGANI_IP_BASED_REDIRECTION_SETTINGS, null );
+	}
+
+	/**
+	 * Get auto redirect URL for a locale
+	 *
+	 * @param string $locale A locale.
+	 * @return bool|string
+	 */
+	public static function auto_redirect_locale_url( string $locale ): bool|string {
+		if ( ! in_array( $locale, self::supported_languages(), true ) ) {
+			$locale = 'en';
+		}
+
+		$option_key = self::AUTO_REDIRECT_LOCALE_URL . $locale;
+
+		return self::setting( $option_key );
+	}
+
+	/**
+	 * Returns languages supported by the main site.
+	 *
+	 * @return array
+	 */
+	public static function supported_languages(): array {
+		return pll_languages_list();
 	}
 }
