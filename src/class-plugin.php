@@ -267,12 +267,19 @@ final class Plugin {
 			if ( $found_languages ) {
 				$user_languages = $found_languages;
 			}
+
+			$user_languages = self::find_user_locales( $user_languages, $page_translations );
+
 			$url = Settings::auto_redirect_locale_url( current( $user_languages ) );
 
+			if(!$url){
+				return;
+			}
 			self::redirect( $url );
 		}
 
 		$user_languages = self::find_user_locales( $user_languages, $page_translations );
+
 
 		$current_page_locale = self::current_page_locale();
 		$user_locale         = current( $user_languages );
