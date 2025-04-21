@@ -159,17 +159,18 @@ class Settings {
 				}
 				break;
 		}
+		if ( is_multisite() && is_main_site() ) {
+			foreach ( self::supported_languages() as $language ) {
+				$option_key = "auto_redirect_locale_url_$language";
+				$value      = isset( $_POST[ $option_key ] ) ? sanitize_text_field( wp_unslash( $_POST[ $option_key ] ) ) : '';
 
-		foreach ( self::supported_languages() as $language ) {
-			$option_key = "auto_redirect_locale_url_$language";
-			$value      = isset( $_POST[ $option_key ] ) ? sanitize_text_field( wp_unslash( $_POST[ $option_key ] ) ) : '';
-
-			if ( ! wp_parse_url( $value, PHP_URL_HOST ) ) {
-				$error = $invalid_url_message;
-				continue;
-			}
-			if ( isset( $_POST[ $option_key ] ) ) {
-				$sanitized[ $option_key ] = $value;
+				if ( ! wp_parse_url( $value, PHP_URL_HOST ) ) {
+					$error = $invalid_url_message;
+					continue;
+				}
+				if ( isset( $_POST[ $option_key ] ) ) {
+					$sanitized[ $option_key ] = $value;
+				}
 			}
 		}
 
@@ -190,7 +191,7 @@ class Settings {
 		if ( isset( $input['geo_api_provider'] ) ) {
 			$sanitized['geo_api_provider'] = sanitize_text_field( $input['geo_api_provider'] );
 		}
-
+		delete_transient( '' );
 		return $sanitized;
 	}
 
@@ -286,7 +287,7 @@ class Settings {
 							__( 'For example: <code>%s</code>', 'ip-location-polylang-redirection' ),
 							array( 'code' => array() )
 						),
-						'http://ip-api.com/php/%s'
+						'http://ip-api.com/json/%s'
 					);
 				?>
 			</li>

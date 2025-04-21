@@ -101,8 +101,13 @@ final class Plugin {
 		if ( $cache ) {
 			return $cache;
 		}
+		$geo_api_url = Settings::setting( 'geo_api_url' );
 
-		$url      = sprintf( Settings::setting( 'geo_api_url' ), $ip_address );
+		if ( ! $geo_api_url ) {
+			return array();
+		}
+		$url = sprintf( $geo_api_url, $ip_address );
+
 		$response = wp_remote_get( $url );
 
 		if ( is_wp_error( $response ) ) {
@@ -264,22 +269,21 @@ final class Plugin {
 
 		if ( is_multisite() && is_main_site() ) {
 			$found_languages = self::find_user_locales( $user_languages, Settings::supported_languages() );
-			if ( $found_languages ) {
+			if ( ! empty( $found_languages ) ) {
 				$user_languages = $found_languages;
 			}
+			$page_locale = self::current_page_locale();
+			$url         = Settings::auto_redirect_locale_url( $page_locale );
+			$slug        = self::get_current_url_endpoint();
+			$url         = trailingslashit( $url ) . $slug;
 
-			$user_languages = self::find_user_locales( $user_languages, $page_translations );
-
-			$url = Settings::auto_redirect_locale_url( current( $user_languages ) );
-
-			if(!$url){
+			if ( ! $url ) {
 				return;
 			}
 			self::redirect( $url );
 		}
 
 		$user_languages = self::find_user_locales( $user_languages, $page_translations );
-
 
 		$current_page_locale = self::current_page_locale();
 		$user_locale         = current( $user_languages );
@@ -298,6 +302,17 @@ final class Plugin {
 		}
 
 		self::redirect( self::link( $user_locale ) );
+	}
+
+	/**
+	 * Returns the current page query path
+	 *
+	 * @return string
+	 */
+	private static function get_current_url_endpoint(): string {
+		global $wp;
+
+		return $wp->request;
 	}
 
 	/**
